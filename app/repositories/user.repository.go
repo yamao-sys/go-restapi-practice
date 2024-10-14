@@ -2,12 +2,15 @@ package repositories
 
 import (
 	"app/models"
+	"log"
 
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
 	CreateUser(user *models.User)
+	FindUserByEmail(user *models.User, email string) error
+	FindUserById(id int) models.User
 }
 
 type userRepository struct {
@@ -20,4 +23,19 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 
 func (ur *userRepository) CreateUser(user *models.User) {
 	ur.db.Create(&user)
+}
+
+func (ur *userRepository) FindUserByEmail(user *models.User, email string) error {
+	if err := ur.db.Where("email = ?", email).First(&user).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ur *userRepository) FindUserById(id int) models.User {
+	user := models.User{}
+	if err := ur.db.Where("id = ?", id).First(&user).Error; err != nil {
+		log.Fatalln(err)
+	}
+	return user
 }

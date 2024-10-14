@@ -20,5 +20,6 @@ func NewAuthRouter(authController controllers.AuthController) AuthRouter {
 
 func (ar *authRouter) SetRouting(r *gin.Engine) {
 	r.POST("/auth/sign_up", ar.authController.SignUp)
-	r.GET("/auth/sign_in", ar.authController.SignIn)
+	r.POST("/auth/sign_in", ar.authController.SignIn)
+	r.GET("/auth/get_user", ar.authController.GetUser)
 }
