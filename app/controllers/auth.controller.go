@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"app/services"
+	"app/utils"
 	"fmt"
 	"net/http"
 
@@ -24,31 +25,47 @@ func NewAuthController(authService services.AuthService) AuthController {
 }
 
 func (authController *authController) SignUp(ctx *gin.Context) {
-	user, error := authController.authService.SignUp(ctx)
-	if error != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": error,
+	result := authController.authService.SignUp(ctx)
+
+	if result.Error == nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"user": result.User,
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"user": user,
-	})
+
+	switch result.ErrorType {
+	case "internalServerError":
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": result.Error,
+		})
+	case "validationError":
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": utils.CoordinateValidationErrors(result.Error),
+		})
+	}
 }
 
 func (authController *authController) SignIn(ctx *gin.Context) {
-	token, error := authController.authService.SignIn(ctx)
-	if error != nil {
+	result := authController.authService.SignIn(ctx)
+
+	if result.NotFoundMessage != "" {
 		ctx.JSON(http.StatusNotFound, gin.H{
-			"error": "User Not Found",
+			"error": result.NotFoundMessage,
+		})
+		return
+	}
+	if result.Error != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": result.Error,
 		})
 		return
 	}
 
 	// NOTE: Cookieにtokenをセット
-	ctx.SetCookie("token", token, 3600*24, "/", "localhost", false, true)
+	ctx.SetCookie("token", result.TokenString, 3600*24, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"token": result.TokenString,
 	})
 }
 

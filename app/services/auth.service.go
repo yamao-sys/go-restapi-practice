@@ -4,18 +4,18 @@ import (
 	"app/dto"
 	"app/models"
 	"app/repositories"
-	"log"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-playground/validator/v10"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService interface {
-	SignUp(ctx *gin.Context) (models.User, error)
-	SignIn(ctx *gin.Context) (string, error)
+	SignUp(ctx *gin.Context) *dto.SignUpResponse
+	SignIn(ctx *gin.Context) *dto.SignInResponse
 	Getuser(id int) models.User
 }
 
@@ -27,45 +27,50 @@ func NewAuthService(userRepository repositories.UserRepository) AuthService {
 	return &authService{userRepository}
 }
 
-func (as *authService) SignUp(ctx *gin.Context) (models.User, error) {
+func (as *authService) SignUp(ctx *gin.Context) *dto.SignUpResponse {
 	// NOTE: リクエストデータを構造体に変換
 	requestParams := dto.SignUpRequest{}
 	if err := ctx.ShouldBind(&requestParams); err != nil {
-		log.Fatalln(err)
-	}
-
-	// TODO: バリデーションチェック
-	// NOTE: パスワードのハッシュ化
-	hashedPassword, err := as.encryptPassword(requestParams.Password)
-	if err != nil {
-		log.Fatalln(err)
+		return &dto.SignUpResponse{User: models.User{}, Error: err, ErrorType: "internalServerError"}
 	}
 
 	user := models.User{}
 	user.Name = requestParams.Name
 	user.Email = requestParams.Email
+	user.Password = requestParams.Password
+	// NOTE: バリデーションチェック
+	validate := validator.New()
+	validationErrors := validate.Struct(user)
+	if validationErrors != nil {
+		return &dto.SignUpResponse{User: user, Error: validationErrors, ErrorType: "validationError"}
+	}
+
+	// NOTE: パスワードをハッシュ化の上、Create処理
+	hashedPassword, err := as.encryptPassword(requestParams.Password)
+	if err != nil {
+		return &dto.SignUpResponse{User: user, Error: err, ErrorType: "internalServerError"}
+	}
 	user.Password = hashedPassword
-	// NOTE: Create処理
 	as.userRepository.CreateUser(&user)
 
-	return user, nil
+	return &dto.SignUpResponse{User: user, Error: nil, ErrorType: ""}
 }
 
-func (as *authService) SignIn(ctx *gin.Context) (string, error) {
+func (as *authService) SignIn(ctx *gin.Context) *dto.SignInResponse {
 	requestParams := dto.SignInRequest{}
 	if err := ctx.ShouldBind(&requestParams); err != nil {
-		log.Fatalln(err)
+		return &dto.SignInResponse{TokenString: "", NotFoundMessage: "", Error: err}
 	}
 
 	// NOTE: emailからユーザの取得
 	user := models.User{}
 	if err := as.userRepository.FindUserByEmail(&user, requestParams.Email); err != nil {
-		return "", err
+		return &dto.SignInResponse{TokenString: "", NotFoundMessage: "メールアドレスまたはパスワードに該当するユーザが存在しません。", Error: nil}
 	}
 
 	// NOTE: パスワードの照合
 	if err := as.compareHashPassword(user.Password, requestParams.Password); err != nil {
-		return "", err
+		return &dto.SignInResponse{TokenString: "", NotFoundMessage: "メールアドレスまたはパスワードに該当するユーザが存在しません。", Error: nil}
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
@@ -74,9 +79,9 @@ func (as *authService) SignIn(ctx *gin.Context) (string, error) {
 	// TODO: JWT_SECRETを環境変数に切り出す
 	tokenString, err := token.SignedString([]byte("abcdefghijklmn"))
 	if err != nil {
-		return "", err
+		return &dto.SignInResponse{TokenString: "", NotFoundMessage: "", Error: err}
 	}
-	return tokenString, nil
+	return &dto.SignInResponse{TokenString: tokenString, NotFoundMessage: "", Error: nil}
 }
 
 func (as *authService) Getuser(id int) models.User {
