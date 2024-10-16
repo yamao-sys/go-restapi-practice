@@ -1,21 +1,51 @@
 package controllers
 
 import (
+	"app/services"
+	"app/utils"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
 type TodoController interface {
-	//
+	CreateTodo(ctx *gin.Context)
 }
 
 type todoController struct {
-	//
+	todoService services.TodoService
+	authService services.AuthService
 }
 
-func NewTodoController() TodoController {
-	return &todoController{}
+func NewTodoController(todoService services.TodoService, authService services.AuthService) TodoController {
+	return &todoController{todoService, authService}
 }
 
-func (todoController *todoController) GetAllTodos(ctx *gin.Context) {
-	//
+func (todoController *todoController) CreateTodo(ctx *gin.Context) {
+	user, err := todoController.authService.GetAuthUser(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "unauthorized error",
+		})
+	}
+
+	result := todoController.todoService.CreateTodo(ctx, user.ID)
+
+	if result.Error == nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"todo": result.Todo,
+		})
+		return
+	}
+
+	switch result.ErrorType {
+	case "internalServerError":
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": result.Error,
+		})
+	case "validationError":
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": utils.CoordinateValidationErrors(result.Error),
+		})
+	}
 }
