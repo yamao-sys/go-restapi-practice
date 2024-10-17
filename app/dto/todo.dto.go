@@ -13,6 +13,18 @@ type CreateTodoResponse struct {
 	ErrorType string
 }
 
+type TodosListResponse struct {
+	Todos     []models.Todo
+	Error     error
+	ErrorType string
+}
+
+type FetchTodoResponse struct {
+	Todo      models.Todo
+	Error     error
+	ErrorType string
+}
+
 type UpdateTodoRequest struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
@@ -24,14 +36,7 @@ type UpdateTodoResponse struct {
 	ErrorType string
 }
 
-type TodosListResponse struct {
-	Todos     []models.Todo
-	Error     error
-	ErrorType string
-}
-
-type FetchTodoResponse struct {
-	Todo      models.Todo
+type DeleteTodoResponse struct {
 	Error     error
 	ErrorType string
 }

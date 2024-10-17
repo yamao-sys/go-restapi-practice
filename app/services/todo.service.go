@@ -15,6 +15,7 @@ type TodoService interface {
 	FetchTodosList(ctx *gin.Context, userId int) *dto.TodosListResponse
 	FetchTodo(ctx *gin.Context, userId int) *dto.FetchTodoResponse
 	UpdateTodo(ctx *gin.Context, userId int) *dto.UpdateTodoResponse
+	DeleteTodo(ctx *gin.Context, userId int) *dto.DeleteTodoResponse
 }
 
 type todoService struct {
@@ -108,4 +109,23 @@ func (ts *todoService) UpdateTodo(ctx *gin.Context, userId int) *dto.UpdateTodoR
 		return &dto.UpdateTodoResponse{Todo: todo, Error: updateError, ErrorType: "internalServerError"}
 	}
 	return &dto.UpdateTodoResponse{Todo: todo, Error: nil, ErrorType: ""}
+}
+
+func (ts *todoService) DeleteTodo(ctx *gin.Context, userId int) *dto.DeleteTodoResponse {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		return &dto.DeleteTodoResponse{Error: err, ErrorType: "internalServerError"}
+	}
+
+	todo := models.Todo{}
+	error := ts.todoRepository.GetTodoById(&todo, id, userId)
+	if error != nil {
+		return &dto.DeleteTodoResponse{Error: error, ErrorType: "notFound"}
+	}
+
+	deleteError := ts.todoRepository.DeleteTodo(&todo)
+	if deleteError != nil {
+		return &dto.DeleteTodoResponse{Error: err, ErrorType: "internalServerError"}
+	}
+	return &dto.DeleteTodoResponse{Error: nil, ErrorType: ""}
 }
