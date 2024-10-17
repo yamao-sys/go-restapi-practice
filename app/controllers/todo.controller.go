@@ -30,6 +30,7 @@ func (todoController *todoController) CreateTodo(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"error": "unauthorized error",
 		})
+		return
 	}
 
 	result := todoController.todoService.CreateTodo(ctx, user.ID)
@@ -89,6 +90,7 @@ func (todoController *todoController) ShowTodo(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"error": "unauthorized error",
 		})
+		return
 	}
 
 	result := todoController.todoService.FetchTodo(ctx, user.ID)
@@ -118,6 +120,7 @@ func (todoController *todoController) UpdateTodo(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"error": "unauthorized error",
 		})
+		return
 	}
 
 	result := todoController.todoService.UpdateTodo(ctx, user.ID)
