@@ -11,6 +11,7 @@ import (
 type TodoController interface {
 	CreateTodo(ctx *gin.Context)
 	UpdateTodo(ctx *gin.Context)
+	ShowTodo(ctx *gin.Context)
 }
 
 type todoController struct {
@@ -47,6 +48,35 @@ func (todoController *todoController) CreateTodo(ctx *gin.Context) {
 	case "validationError":
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": utils.CoordinateValidationErrors(result.Error),
+		})
+	}
+}
+
+func (todoController *todoController) ShowTodo(ctx *gin.Context) {
+	user, err := todoController.authService.GetAuthUser(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "unauthorized error",
+		})
+	}
+
+	result := todoController.todoService.FetchTodo(ctx, user.ID)
+
+	if result.Error == nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"todo": result.Todo,
+		})
+		return
+	}
+
+	switch result.ErrorType {
+	case "notFound":
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": result.Error,
+		})
+	case "internalServerError":
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": result.Error,
 		})
 	}
 }
