@@ -4,8 +4,19 @@ GoのREST APIで簡単なTODOリストを作ってみる
 ## 参考
 - Gin入門
 	- https://qiita.com/ozora/items/0597e52b3f9c1759e292
+- net/httpのステータスコード
+	- https://go.dev/src/net/http/status.go
+- Goのエラーハンドリング
+	- https://qiita.com/inanohashi/items/a4d9f206aa0c8b7a01bd
+	- https://go.dev/blog/error-handling-and-go
+	- https://zenn.dev/snowcrush/articles/21f28163e067cb
 - Gorm
 	- migration
 		- https://gorm.io/ja_JP/docs/migration.html
 	- sql.DB
 		- https://gorm.io/ja_JP/docs/generic_interface.html
+- go-playground/validator
+	- https://tech.yappli.io/entry/go_validate
+	- https://note.com/mkudo/n/n139de888a151
+- ディレクトリ設計
+	- https://zenn.dev/yuki_tu/articles/f7636df51eef0a#%E5%85%A8%E4%BD%93%E3%83%84%E3%83%AA%E3%83%BC

@@ -8,7 +8,7 @@ import (
 )
 
 func migrate(db *gorm.DB) {
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, &models.Todo{})
 }
 
 func main() {

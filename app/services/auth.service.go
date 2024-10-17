@@ -4,6 +4,7 @@ import (
 	"app/dto"
 	"app/models"
 	"app/repositories"
+	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -16,6 +17,7 @@ import (
 type AuthService interface {
 	SignUp(ctx *gin.Context) *dto.SignUpResponse
 	SignIn(ctx *gin.Context) *dto.SignInResponse
+	GetAuthUser(ctx *gin.Context) (models.User, error)
 	Getuser(id int) models.User
 }
 
@@ -82,6 +84,31 @@ func (as *authService) SignIn(ctx *gin.Context) *dto.SignInResponse {
 		return &dto.SignInResponse{TokenString: "", NotFoundMessage: "", Error: err}
 	}
 	return &dto.SignInResponse{TokenString: tokenString, NotFoundMessage: "", Error: nil}
+}
+
+func (as *authService) GetAuthUser(ctx *gin.Context) (models.User, error) {
+	// NOTE: Cookieからtokenを取得
+	tokenString, err := ctx.Cookie("token")
+	if err != nil {
+		return models.User{}, err
+	}
+	// NOTE: tokenに該当するユーザを取得する
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte("abcdefghijklmn"), nil
+	})
+	var userId int
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userId = int(claims["user_id"].(float64))
+	}
+	if userId == 0 {
+		return models.User{}, fmt.Errorf("invalid token")
+	}
+
+	return as.userRepository.FindUserById(userId), nil
 }
 
 func (as *authService) Getuser(id int) models.User {
