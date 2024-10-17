@@ -24,6 +24,12 @@ type UpdateTodoResponse struct {
 	ErrorType string
 }
 
+type TodosListResponse struct {
+	Todos     []models.Todo
+	Error     error
+	ErrorType string
+}
+
 type FetchTodoResponse struct {
 	Todo      models.Todo
 	Error     error

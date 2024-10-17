@@ -20,6 +20,7 @@ func NewTodoRouter(todoController controllers.TodoController) TodoRouter {
 
 func (tr *todoRouter) SetRouting(r *gin.Engine) {
 	r.POST("/todos/", tr.todoController.CreateTodo)
+	r.GET("/todos/", tr.todoController.IndexTodos)
 	r.GET("/todos/:id", tr.todoController.ShowTodo)
 	r.PUT("/todos/:id", tr.todoController.UpdateTodo)
 }

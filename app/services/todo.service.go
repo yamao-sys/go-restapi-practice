@@ -12,6 +12,7 @@ import (
 
 type TodoService interface {
 	CreateTodo(ctx *gin.Context, userId int) *dto.CreateTodoResponse
+	FetchTodosList(ctx *gin.Context, userId int) *dto.TodosListResponse
 	FetchTodo(ctx *gin.Context, userId int) *dto.FetchTodoResponse
 	UpdateTodo(ctx *gin.Context, userId int) *dto.UpdateTodoResponse
 }
@@ -48,6 +49,16 @@ func (ts *todoService) CreateTodo(ctx *gin.Context, userId int) *dto.CreateTodoR
 		return &dto.CreateTodoResponse{Todo: todo, Error: err, ErrorType: "internalServerError"}
 	}
 	return &dto.CreateTodoResponse{Todo: todo, Error: nil, ErrorType: ""}
+}
+
+func (ts *todoService) FetchTodosList(ctx *gin.Context, userId int) *dto.TodosListResponse {
+	todos := []models.Todo{}
+	error := ts.todoRepository.GetAllTodos(&todos, userId)
+	if error != nil {
+		return &dto.TodosListResponse{Todos: []models.Todo{}, Error: error, ErrorType: "notFound"}
+	}
+
+	return &dto.TodosListResponse{Todos: todos, Error: nil, ErrorType: ""}
 }
 
 func (ts *todoService) FetchTodo(ctx *gin.Context, userId int) *dto.FetchTodoResponse {
