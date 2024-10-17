@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strconv"
 
 	"app/config"
@@ -15,8 +14,6 @@ import (
 )
 
 func main() {
-	fmt.Println("test")
-
 	dbCon := db.Init()
 
 	// repository
