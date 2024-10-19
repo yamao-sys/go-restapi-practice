@@ -20,3 +20,8 @@ GoのREST APIで簡単なTODOリストを作ってみる
 	- https://note.com/mkudo/n/n139de888a151
 - ディレクトリ設計
 	- https://zenn.dev/yuki_tu/articles/f7636df51eef0a#%E5%85%A8%E4%BD%93%E3%83%84%E3%83%AA%E3%83%BC
+- テスト
+	- https://tech.buysell-technologies.com/entry/adventcalendar2021-12-02
+- DBを用いたテスト
+	- https://zenn.dev/kuwashima/articles/b5eae9f64871be
+	- https://qiita.com/johejo/items/a8f69d4d51776b9b3f54
