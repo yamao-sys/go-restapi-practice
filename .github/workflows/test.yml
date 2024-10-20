@@ -33,6 +33,11 @@ jobs:
         working-directory: ./app
         run: go mod tidy
 
+      - name: Setup test
+        run: |
+          mkdir /app
+          cp ./app/config.ini /app/config.ini
+
       - name: Build
         working-directory: ./app
         run: go build -v ./...
