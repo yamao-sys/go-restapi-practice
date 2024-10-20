@@ -3,72 +3,160 @@ package services
 import (
 	"app/dto"
 	"app/models"
+	"app/repositories"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/crypto/bcrypt"
 )
 
-type ServiceTestSuite struct {
-	suite.Suite
+type TestTodoServiceSuite struct {
+	WithDbSuite
 }
 
-type MockTodoRepository struct {
-	mock.Mock
+var (
+	user            models.User
+	testTodoService TodoService
+)
+
+func (s *TestTodoServiceSuite) SetupTest() {
+	s.SetDbCon()
+
+	// NOTE: テスト用ユーザの作成
+	user.Name = "test user 1"
+	user.Email = "test@example.com"
+	hash, err := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+	if err != nil {
+		s.T().Fatalf("failed to generate hash %v", err)
+	}
+	user.Password = string(hash)
+	if err := DbCon.Create(&user).Error; err != nil {
+		s.T().Fatalf("failed to create test user %v", err)
+	}
+
+	todoRepository := repositories.NewTodoRepository(DbCon)
+	testTodoService = NewTodoService(todoRepository)
 }
 
-func (_m *MockTodoRepository) CreateTodo(todo *models.Todo) error {
-	ret := _m.Called(todo)
-	return ret.Error(0)
+func (s *TestTodoServiceSuite) TearDownTest() {
+	s.CloseDb()
 }
 
-func (_m *MockTodoRepository) GetAllTodos(todos *[]models.Todo, userId int) error {
-	ret := _m.Called(todos, userId)
-	return ret.Error(0)
-}
+func (s *TestTodoServiceSuite) TestCreateTodo() {
+	requestParams := dto.CreateTodoRequest{Title: "test title 1", Content: "test content 1"}
 
-func (_m *MockTodoRepository) GetTodoById(todo *models.Todo, id int, userId int) error {
-	ret := _m.Called(todo, id, userId)
-	return ret.Error(0)
-}
+	result := testTodoService.CreateTodo(requestParams, user.ID)
 
-func (_m *MockTodoRepository) UpdateTodo(todo *models.Todo) error {
-	ret := _m.Called(todo)
-	return ret.Error(0)
-}
-
-func (_m *MockTodoRepository) DeleteTodo(todo *models.Todo) error {
-	ret := _m.Called(todo)
-	return ret.Error(0)
-}
-
-func (s *ServiceTestSuite) TestCreateTodo() {
-	// todoRepositoryをmock化
-	mockTodoRepository := new(MockTodoRepository)
-	mockTodoRepository.On("CreateTodo", &models.Todo{Title: "test title 1", Content: "test content 1", UserID: 1}).Return(nil)
-
-	ts := NewTodoService(mockTodoRepository)
-	result := ts.CreateTodo(dto.CreateTodoRequest{Title: "test title 1", Content: "test content 1"}, 1)
-
-	assert.Equal(s.T(), nil, result.Error)
+	assert.Nil(s.T(), result.Error)
 	assert.Equal(s.T(), "", result.ErrorType)
-	assert.Equal(s.T(), "test title 1", result.Todo.Title)
-	assert.Equal(s.T(), "test content 1", result.Todo.Content)
+
+	// NOTE: Todoリストが作成されていることを確認
+	todo := models.Todo{}
+	if err := DbCon.Where("user_id = ?", user.ID).First(&todo).Error; err != nil {
+		s.T().Fatalf("failed to create todo %v", err)
+	}
+	assert.Equal(s.T(), "test title 1", todo.Title)
+	assert.Equal(s.T(), "test content 1", todo.Content)
 }
 
-func (s *ServiceTestSuite) TestFetchTodosList() {
-	// todoRepositoryをmock化
-	mockTodoRepository := new(MockTodoRepository)
-	mockTodoRepository.On("GetAllTodos", &[]models.Todo{}, 1).Return(nil)
+func (s *TestTodoServiceSuite) TestCreateTodo_ValidationError() {
+	requestParams := dto.CreateTodoRequest{Title: "", Content: "test content 1"}
 
-	ts := NewTodoService(mockTodoRepository)
-	result := ts.FetchTodosList(1)
+	result := testTodoService.CreateTodo(requestParams, user.ID)
 
-	assert.Equal(s.T(), nil, result.Error)
+	assert.NotNil(s.T(), result.Error)
+	assert.Equal(s.T(), "validationError", result.ErrorType)
+
+	// NOTE: Todoリストが作成されていないことを確認
+	todo := models.Todo{}
+	err := DbCon.Where("user_id = ?", user.ID).First(&todo).Error
+	assert.NotNil(s.T(), err)
+}
+
+func (s *TestTodoServiceSuite) TestFetchTodosList() {
+	testTodos := []models.Todo{
+		{
+			Title:   "test title 1",
+			Content: "test content 1",
+			UserID:  user.ID,
+		},
+		{
+			Title:   "test title 2",
+			Content: "test content 2",
+			UserID:  user.ID,
+		},
+	}
+	if err := DbCon.Create(&testTodos).Error; err != nil {
+		s.T().Fatalf("failed to create test todos %v", err)
+	}
+
+	result := testTodoService.FetchTodosList(user.ID)
+
+	assert.Nil(s.T(), result.Error)
+	assert.Equal(s.T(), "", result.ErrorType)
+	assert.Len(s.T(), result.Todos, 2)
+}
+
+func (s *TestTodoServiceSuite) TestFetchTodo() {
+	testTodo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
+	if err := DbCon.Create(&testTodo).Error; err != nil {
+		s.T().Fatalf("failed to create test todos %v", err)
+	}
+
+	result := testTodoService.FetchTodo(testTodo.ID, user.ID)
+
+	assert.Nil(s.T(), result.Error)
+	assert.Equal(s.T(), "", result.ErrorType)
+	assert.Equal(s.T(), testTodo.Title, result.Todo.Title)
+}
+
+func (s *TestTodoServiceSuite) TestUpdateTodo() {
+	testTodo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
+	if err := DbCon.Create(&testTodo).Error; err != nil {
+		s.T().Fatalf("failed to create test todos %v", err)
+	}
+
+	requestParams := dto.UpdateTodoRequest{Title: "test updated title 1", Content: "test updated content 1"}
+	result := testTodoService.UpdateTodo(testTodo.ID, requestParams, user.ID)
+
+	assert.Nil(s.T(), result.Error)
+	assert.Equal(s.T(), "", result.ErrorType)
+	assert.Equal(s.T(), "test updated title 1", result.Todo.Title)
+	assert.Equal(s.T(), "test updated content 1", result.Todo.Content)
+}
+
+func (s *TestTodoServiceSuite) TestUpdateTodo_ValidationError() {
+	testTodo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
+	if err := DbCon.Create(&testTodo).Error; err != nil {
+		s.T().Fatalf("failed to create test todos %v", err)
+	}
+
+	requestParams := dto.UpdateTodoRequest{Title: "", Content: "test updated content 1"}
+	result := testTodoService.UpdateTodo(testTodo.ID, requestParams, user.ID)
+
+	assert.NotNil(s.T(), result.Error)
+	assert.Equal(s.T(), "validationError", result.ErrorType)
+	// NOTE: Todoが更新されていないこと
+	todo := models.Todo{}
+	DbCon.Where("user_id = ?", user.ID).First(&todo)
+	assert.Equal(s.T(), "test title 1", todo.Title)
+	assert.Equal(s.T(), "test content 1", todo.Content)
+}
+
+func (s *TestTodoServiceSuite) TestDeleteTodo() {
+	testTodo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
+	if err := DbCon.Create(&testTodo).Error; err != nil {
+		s.T().Fatalf("failed to create test todos %v", err)
+	}
+
+	result := testTodoService.DeleteTodo(testTodo.ID, user.ID)
+
+	assert.Nil(s.T(), result.Error)
 	assert.Equal(s.T(), "", result.ErrorType)
 }
 
 func TestTodoService(t *testing.T) {
-	suite.Run(t, new(ServiceTestSuite))
+	// テストスイートを実行
+	suite.Run(t, new(TestTodoServiceSuite))
 }
