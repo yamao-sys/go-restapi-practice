@@ -15,8 +15,8 @@ import (
 )
 
 type AuthService interface {
-	SignUp(ctx *gin.Context) *dto.SignUpResponse
-	SignIn(ctx *gin.Context) *dto.SignInResponse
+	SignUp(requestParams dto.SignUpRequest) *dto.SignUpResponse
+	SignIn(requestParams dto.SignInRequest) *dto.SignInResponse
 	GetAuthUser(ctx *gin.Context) (models.User, error)
 	Getuser(id int) models.User
 }
@@ -29,13 +29,7 @@ func NewAuthService(userRepository repositories.UserRepository) AuthService {
 	return &authService{userRepository}
 }
 
-func (as *authService) SignUp(ctx *gin.Context) *dto.SignUpResponse {
-	// NOTE: リクエストデータを構造体に変換
-	requestParams := dto.SignUpRequest{}
-	if err := ctx.ShouldBind(&requestParams); err != nil {
-		return &dto.SignUpResponse{User: models.User{}, Error: err, ErrorType: "internalServerError"}
-	}
-
+func (as *authService) SignUp(requestParams dto.SignUpRequest) *dto.SignUpResponse {
 	user := models.User{}
 	user.Name = requestParams.Name
 	user.Email = requestParams.Email
@@ -58,12 +52,7 @@ func (as *authService) SignUp(ctx *gin.Context) *dto.SignUpResponse {
 	return &dto.SignUpResponse{User: user, Error: nil, ErrorType: ""}
 }
 
-func (as *authService) SignIn(ctx *gin.Context) *dto.SignInResponse {
-	requestParams := dto.SignInRequest{}
-	if err := ctx.ShouldBind(&requestParams); err != nil {
-		return &dto.SignInResponse{TokenString: "", NotFoundMessage: "", Error: err}
-	}
-
+func (as *authService) SignIn(requestParams dto.SignInRequest) *dto.SignInResponse {
 	// NOTE: emailからユーザの取得
 	user := models.User{}
 	if err := as.userRepository.FindUserByEmail(&user, requestParams.Email); err != nil {
