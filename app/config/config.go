@@ -20,7 +20,13 @@ type ConfigList struct {
 var Config ConfigList
 
 func init() {
-	cfg, err := ini.Load("/app/config.ini")
+	var iniFilePath string
+	if os.Getenv("ENVIRONMENT") != "" {
+		iniFilePath = "/app/config." + os.Getenv("ENVIRONMENT") + ".ini"
+	} else {
+		iniFilePath = "/app/config.ini"
+	}
+	cfg, err := ini.Load(iniFilePath)
 	if err != nil {
 		log.Fatalln(err)
 		os.Exit(1)

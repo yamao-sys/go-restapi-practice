@@ -38,9 +38,14 @@ jobs:
           sudo mkdir /app
           sudo cp ./app/config.ini /app/config.ini
 
+      - name: Setup test database
+        working-directory: ./app/db/migrate
+        run: |
+          ENVIRONMENT=test go run main.go
+
       - name: test
         working-directory: ./app
-        run: go test -p=1 -v ./...
+        run: go test -v ./...
 
       - name: Build
         working-directory: ./app
