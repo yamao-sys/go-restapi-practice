@@ -37,6 +37,7 @@ jobs:
         run: |
           sudo mkdir /app
           sudo cp ./app/config.ini /app/config.ini
+          sudo cp ./app/config.test.ini /app/config.test.ini
 
       - name: Setup test database
         working-directory: ./app/db/migrate
