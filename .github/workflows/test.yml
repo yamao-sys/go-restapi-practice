@@ -38,10 +38,10 @@ jobs:
           sudo mkdir /app
           sudo cp ./app/config.ini /app/config.ini
 
-      - name: Build
-        working-directory: ./app
-        run: go build -v ./...
-
       - name: test
         working-directory: ./app
         run: go test -v ./...
+
+      - name: Build
+        working-directory: ./app
+        run: go build -v ./...
