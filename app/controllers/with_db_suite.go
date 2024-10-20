@@ -47,11 +47,12 @@ func init() {
 		"go_restapi_practice_test" +
 		"?charset=utf8mb4&parseTime=true&loc=Local"
 
-	txdb.Register("txdb-controller"+strconv.Itoa(pid), "mysql", dsn)
+	txdb.Register("txdb-controller", "mysql", dsn)
 }
 
 func (s *WithDbSuite) SetDbCon() {
-	db, err := sql.Open("txdb-controller"+strconv.Itoa(pid), "connect")
+	log.Printf("pid: %v", pid)
+	db, err := sql.Open("txdb-controller", "connect"+strconv.Itoa(pid))
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -38,11 +38,12 @@ func init() {
 		"go_restapi_practice_test" +
 		"?charset=utf8mb4&parseTime=true&loc=Local"
 
-	txdb.Register("txdb-service"+strconv.Itoa(pid), "mysql", dsn)
+	txdb.Register("txdb-service", "mysql", dsn)
 }
 
 func (s *WithDbSuite) SetDbCon() {
-	db, err := sql.Open("txdb-service"+strconv.Itoa(pid), "connect")
+	log.Printf("pid: %v", pid)
+	db, err := sql.Open("txdb-service", "connect"+strconv.Itoa(pid))
 	if err != nil {
 		log.Fatalln(err)
 	}
