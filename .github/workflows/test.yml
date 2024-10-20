@@ -41,7 +41,7 @@ jobs:
       - name: Setup test database
         working-directory: ./app/db/migrate
         run: |
-          ENVIRONMENT=test go run main.go
+          ENVIRONMENT=test go run migrate.go
 
       - name: test
         working-directory: ./app
