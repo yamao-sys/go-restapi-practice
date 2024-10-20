@@ -10,6 +10,8 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strconv"
 
 	"github.com/DATA-DOG/go-txdb"
 	"github.com/gin-gonic/gin"
@@ -24,6 +26,7 @@ type WithDbSuite struct {
 
 var (
 	DbCon *gorm.DB
+	pid   int
 	token string
 )
 
@@ -35,6 +38,8 @@ var (
 // func (s *WithDbSuite) AfterTest(suiteName, testName string)  {} // テストケース終了後の処理
 
 func init() {
+	pid = os.Getpid()
+
 	dsn := config.Config.DbUserName +
 		":" +
 		config.Config.DbUserPassword +
@@ -42,11 +47,11 @@ func init() {
 		"go_restapi_practice_test" +
 		"?charset=utf8mb4&parseTime=true&loc=Local"
 
-	txdb.Register("txdb-controller", "mysql", dsn)
+	txdb.Register("txdb-controller"+strconv.Itoa(pid), "mysql", dsn)
 }
 
 func (s *WithDbSuite) SetDbCon() {
-	db, err := sql.Open("txdb-controller", "connect")
+	db, err := sql.Open("txdb-controller"+strconv.Itoa(pid), "connect")
 	if err != nil {
 		log.Fatalln(err)
 	}
