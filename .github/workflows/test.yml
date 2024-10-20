@@ -35,8 +35,8 @@ jobs:
 
       - name: Setup test
         run: |
-          mkdir /app
-          cp ./app/config.ini /app/config.ini
+          sudo mkdir /app
+          sudo cp ./app/config.ini /app/config.ini
 
       - name: Build
         working-directory: ./app
