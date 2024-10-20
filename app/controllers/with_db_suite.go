@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"app/config"
+	"app/models"
 	"app/repositories"
 	"app/services"
 	"bytes"
@@ -56,6 +57,7 @@ func (s *WithDbSuite) SetDbCon() {
 	if err != nil {
 		s.T().Fatalf("failed to initialize GORM DB: %v", err)
 	}
+	DbCon.AutoMigrate(&models.User{}, &models.Todo{})
 }
 
 func (s *WithDbSuite) CloseDb() {
