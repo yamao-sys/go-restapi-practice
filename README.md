@@ -38,3 +38,9 @@ GoのREST APIで簡単なTODOリストを作ってみる
 	- https://www.naka-sys.okinawa/golang-gin-unit-test/#google_vignette
 - Goのテスタブルな設計
 	- https://qiita.com/hiroyky/items/4a9be463e752d5c0c41c#%E3%83%86%E3%82%B9%E3%83%88%E3%81%97%E3%82%84%E3%81%99%E3%81%84%E3%82%B3%E3%83%BC%E3%83%89%E3%81%AE%E6%9B%B8%E3%81%8D%E6%96%B9
+- Lint
+	- https://qiita.com/Ixy_194/items/0e90dd74c5089d5db9b4
+	- https://blog.cybozu.io/entry/2021/02/26/081013
+	- https://qiita.com/yagi_eng/items/1c34f9691128c51846e7
+	- https://staticcheck.dev/docs/configuration
+	- https://staticcheck.dev/docs/checks/

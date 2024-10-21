@@ -1,0 +1,12 @@
+{
+	"gopls": {
+		"ui.diagnostic.staticcheck": true,
+    "analyses": {
+      "ST1003": true,
+			"ST1016": true,
+			"ST1020": true,
+			"ST1021": true,
+			"ST1022": true
+    }
+	}
+}
