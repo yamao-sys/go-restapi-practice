@@ -20,8 +20,21 @@ GoのREST APIで簡単なTODOリストを作ってみる
 	- https://note.com/mkudo/n/n139de888a151
 - ディレクトリ設計
 	- https://zenn.dev/yuki_tu/articles/f7636df51eef0a#%E5%85%A8%E4%BD%93%E3%83%84%E3%83%AA%E3%83%BC
+- 環境変数
+	- https://zenn.dev/kurusugawa/articles/golang-env-lib
 - テスト
 	- https://tech.buysell-technologies.com/entry/adventcalendar2021-12-02
 - DBを用いたテスト
 	- https://zenn.dev/kuwashima/articles/b5eae9f64871be
 	- https://qiita.com/johejo/items/a8f69d4d51776b9b3f54
+	- https://zenn.dev/smartshopping/articles/9595a70a7d7955
+	- https://pkg.go.dev/github.com/bluele/factory-go@v0.0.1/factory
+	- https://tech.every.tv/entry/2024/02/28/191158
+- Mockを用いたテスト
+	- https://qiita.com/muroon/items/f8beec802c29e66d1918
+- Ginのテスト
+	- https://qiita.com/takehanKosuke/items/849c732c5892d149b50a
+	- https://zenn.dev/diwamoto/articles/aba45dc2da36b8
+	- https://www.naka-sys.okinawa/golang-gin-unit-test/#google_vignette
+- Goのテスタブルな設計
+	- https://qiita.com/hiroyky/items/4a9be463e752d5c0c41c#%E3%83%86%E3%82%B9%E3%83%88%E3%81%97%E3%82%84%E3%81%99%E3%81%84%E3%82%B3%E3%83%BC%E3%83%89%E3%81%AE%E6%9B%B8%E3%81%8D%E6%96%B9
