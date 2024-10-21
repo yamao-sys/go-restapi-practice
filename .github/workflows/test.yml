@@ -33,20 +33,19 @@ jobs:
         working-directory: ./app
         run: go mod tidy
 
-      - name: Setup test
+      - name: Copy env file
         run: |
           sudo mkdir /app
-          sudo cp ./app/config.ini /app/config.ini
-          sudo cp ./app/config.test.ini /app/config.test.ini
+          sudo cp ./app/env.test /app/env.test
 
       - name: Setup test database
         working-directory: ./app/db/migrate
         run: |
-          ENVIRONMENT=test go run migrate.go
+          ENV=test go run migrate.go
 
       - name: test
         working-directory: ./app
-        run: go test -v ./...
+        run: ENV=test go test -v ./...
 
       - name: Build
         working-directory: ./app
