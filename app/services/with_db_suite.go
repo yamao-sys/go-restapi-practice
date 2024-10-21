@@ -1,7 +1,7 @@
 package services
 
 import (
-	"app/config"
+	"app/db"
 	"database/sql"
 	"log"
 	"os"
@@ -30,14 +30,7 @@ var pid int
 func init() {
 	pid = os.Getpid()
 
-	dsn := config.Config.DbUserName +
-		":" +
-		config.Config.DbUserPassword +
-		"@tcp(" + config.Config.DbHost + ":" + config.Config.DbPort + ")/" +
-		"go_restapi_practice_test" +
-		"?charset=utf8mb4&parseTime=true&loc=Local"
-
-	txdb.Register("txdb-service", "mysql", dsn)
+	txdb.Register("txdb-service", "mysql", db.GetDsn())
 }
 
 func (s *WithDbSuite) SetDbCon() {
