@@ -9,8 +9,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"strconv"
 
 	"github.com/DATA-DOG/go-txdb"
 	"github.com/gin-gonic/gin"
@@ -25,7 +23,6 @@ type WithDbSuite struct {
 
 var (
 	DbCon *gorm.DB
-	pid   int
 	token string
 )
 
@@ -37,14 +34,11 @@ var (
 // func (s *WithDbSuite) AfterTest(suiteName, testName string)  {} // テストケース終了後の処理
 
 func init() {
-	pid = os.Getpid()
-
 	txdb.Register("txdb-controller", "mysql", db.GetDsn())
 }
 
 func (s *WithDbSuite) SetDbCon() {
-	log.Printf("pid: %v", pid)
-	db, err := sql.Open("txdb-controller", "connect"+strconv.Itoa(pid))
+	db, err := sql.Open("txdb-controller", "connect")
 	if err != nil {
 		log.Fatalln(err)
 	}

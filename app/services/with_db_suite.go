@@ -4,8 +4,6 @@ import (
 	"app/db"
 	"database/sql"
 	"log"
-	"os"
-	"strconv"
 
 	"github.com/DATA-DOG/go-txdb"
 	"github.com/stretchr/testify/suite"
@@ -18,7 +16,6 @@ type WithDbSuite struct {
 }
 
 var DbCon *gorm.DB
-var pid int
 
 // func (s *WithDbSuite) SetupSuite()                           {} // テストスイート実施前の処理
 // func (s *WithDbSuite) TearDownSuite()                        {} // テストスイート終了後の処理
@@ -28,14 +25,11 @@ var pid int
 // func (s *WithDbSuite) AfterTest(suiteName, testName string)  {} // テストケース終了後の処理
 
 func init() {
-	pid = os.Getpid()
-
 	txdb.Register("txdb-service", "mysql", db.GetDsn())
 }
 
 func (s *WithDbSuite) SetDbCon() {
-	log.Printf("pid: %v", pid)
-	db, err := sql.Open("txdb-service", "connect"+strconv.Itoa(pid))
+	db, err := sql.Open("txdb-service", "connect")
 	if err != nil {
 		log.Fatalln(err)
 	}
