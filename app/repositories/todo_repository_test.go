@@ -2,14 +2,14 @@ package repositories
 
 import (
 	"app/models"
+	"app/test/factories"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"golang.org/x/crypto/bcrypt"
 )
 
-var user models.User
+var user *models.User
 
 type TestTodoRePositorySuite struct {
 	WithDbSuite
@@ -19,13 +19,7 @@ func (s *TestTodoRePositorySuite) SetupTest() {
 	s.SetDbCon()
 
 	// NOTE: テスト用ユーザの作成
-	user.Name = "test user 1"
-	user.Email = "test@example.com"
-	hash, err := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
-	if err != nil {
-		s.T().Fatalf("failed to generate hash %v", err)
-	}
-	user.Password = string(hash)
+	user = factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
 	if err := DbCon.Create(&user).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}

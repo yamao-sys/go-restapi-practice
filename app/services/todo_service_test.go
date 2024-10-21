@@ -4,11 +4,11 @@ import (
 	"app/dto"
 	"app/models"
 	"app/repositories"
+	"app/test/factories"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type TestTodoServiceSuite struct {
@@ -16,7 +16,7 @@ type TestTodoServiceSuite struct {
 }
 
 var (
-	user            models.User
+	user            *models.User
 	testTodoService TodoService
 )
 
@@ -24,13 +24,7 @@ func (s *TestTodoServiceSuite) SetupTest() {
 	s.SetDbCon()
 
 	// NOTE: テスト用ユーザの作成
-	user.Name = "test user 1"
-	user.Email = "test@example.com"
-	hash, err := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
-	if err != nil {
-		s.T().Fatalf("failed to generate hash %v", err)
-	}
-	user.Password = string(hash)
+	user = factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
 	if err := DbCon.Create(&user).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"app/models"
+	"app/test/factories"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,15 +39,8 @@ func (s *TestUserRePositorySuite) TestCreateUser() {
 }
 
 func (s *TestUserRePositorySuite) TestFindUserByEmail() {
-	insertUser := models.User{}
-	insertUser.Name = "test user 1"
-	insertUser.Email = "test@example.com"
-	hash, err := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
-	if err != nil {
-		s.T().Fatalf("failed to generate hash %v", err)
-	}
-	insertUser.Password = string(hash)
-	if err := DbCon.Create(&insertUser).Error; err != nil {
+	testUser := factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
+	if err := DbCon.Create(&testUser).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}
 
@@ -54,26 +48,19 @@ func (s *TestUserRePositorySuite) TestFindUserByEmail() {
 	ur := NewUserRepository(DbCon)
 	ur.FindUserByEmail(&user, "test@example.com")
 
-	assert.Equal(s.T(), insertUser.ID, user.ID)
+	assert.Equal(s.T(), testUser.ID, user.ID)
 }
 
 func (s *TestUserRePositorySuite) TestFindUserById() {
-	insertUser := models.User{}
-	insertUser.Name = "test user 1"
-	insertUser.Email = "test@example.com"
-	hash, err := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
-	if err != nil {
-		s.T().Fatalf("failed to generate hash %v", err)
-	}
-	insertUser.Password = string(hash)
-	if err := DbCon.Create(&insertUser).Error; err != nil {
+	testUser := factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
+	if err := DbCon.Create(&testUser).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}
 
 	ur := NewUserRepository(DbCon)
-	user := ur.FindUserById(insertUser.ID)
+	user := ur.FindUserById(testUser.ID)
 
-	assert.Equal(s.T(), "test user 1", user.Name)
+	assert.Equal(s.T(), testUser.Name, user.Name)
 }
 
 func TestUserRepository(t *testing.T) {
