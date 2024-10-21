@@ -4,18 +4,16 @@ import (
 	"app/dto"
 	"app/models"
 	"app/repositories"
-	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
 type TodoService interface {
-	CreateTodo(ctx *gin.Context, userId int) *dto.CreateTodoResponse
-	FetchTodosList(ctx *gin.Context, userId int) *dto.TodosListResponse
-	FetchTodo(ctx *gin.Context, userId int) *dto.FetchTodoResponse
-	UpdateTodo(ctx *gin.Context, userId int) *dto.UpdateTodoResponse
-	DeleteTodo(ctx *gin.Context, userId int) *dto.DeleteTodoResponse
+	CreateTodo(requestParams dto.CreateTodoRequest, userId int) *dto.CreateTodoResponse
+	FetchTodosList(userId int) *dto.TodosListResponse
+	FetchTodo(id int, userId int) *dto.FetchTodoResponse
+	UpdateTodo(id int, requestParams dto.UpdateTodoRequest, userId int) *dto.UpdateTodoResponse
+	DeleteTodo(id int, userId int) *dto.DeleteTodoResponse
 }
 
 type todoService struct {
@@ -26,13 +24,7 @@ func NewTodoService(todoRepository repositories.TodoRepository) TodoService {
 	return &todoService{todoRepository}
 }
 
-func (ts *todoService) CreateTodo(ctx *gin.Context, userId int) *dto.CreateTodoResponse {
-	// NOTE: リクエストデータを構造体に変換
-	requestParams := dto.CreateTodoRequest{}
-	if err := ctx.ShouldBind(&requestParams); err != nil {
-		return &dto.CreateTodoResponse{Todo: models.Todo{}, Error: err, ErrorType: "internalServerError"}
-	}
-
+func (ts *todoService) CreateTodo(requestParams dto.CreateTodoRequest, userId int) *dto.CreateTodoResponse {
 	todo := models.Todo{}
 	todo.Title = requestParams.Title
 	todo.Content = requestParams.Content
@@ -52,7 +44,7 @@ func (ts *todoService) CreateTodo(ctx *gin.Context, userId int) *dto.CreateTodoR
 	return &dto.CreateTodoResponse{Todo: todo, Error: nil, ErrorType: ""}
 }
 
-func (ts *todoService) FetchTodosList(ctx *gin.Context, userId int) *dto.TodosListResponse {
+func (ts *todoService) FetchTodosList(userId int) *dto.TodosListResponse {
 	todos := []models.Todo{}
 	error := ts.todoRepository.GetAllTodos(&todos, userId)
 	if error != nil {
@@ -62,12 +54,7 @@ func (ts *todoService) FetchTodosList(ctx *gin.Context, userId int) *dto.TodosLi
 	return &dto.TodosListResponse{Todos: todos, Error: nil, ErrorType: ""}
 }
 
-func (ts *todoService) FetchTodo(ctx *gin.Context, userId int) *dto.FetchTodoResponse {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		return &dto.FetchTodoResponse{Todo: models.Todo{}, Error: err, ErrorType: "internalServerError"}
-	}
-
+func (ts *todoService) FetchTodo(id int, userId int) *dto.FetchTodoResponse {
 	todo := models.Todo{}
 	error := ts.todoRepository.GetTodoById(&todo, id, userId)
 	if error != nil {
@@ -77,23 +64,13 @@ func (ts *todoService) FetchTodo(ctx *gin.Context, userId int) *dto.FetchTodoRes
 	return &dto.FetchTodoResponse{Todo: todo, Error: nil, ErrorType: ""}
 }
 
-func (ts *todoService) UpdateTodo(ctx *gin.Context, userId int) *dto.UpdateTodoResponse {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		return &dto.UpdateTodoResponse{Todo: models.Todo{}, Error: err, ErrorType: "internalServerError"}
-	}
-
+func (ts *todoService) UpdateTodo(id int, requestParams dto.UpdateTodoRequest, userId int) *dto.UpdateTodoResponse {
 	todo := models.Todo{}
 	error := ts.todoRepository.GetTodoById(&todo, id, userId)
 	if error != nil {
 		return &dto.UpdateTodoResponse{Todo: models.Todo{}, Error: error, ErrorType: "notFound"}
 	}
 
-	// NOTE: リクエストデータを構造体に変換
-	requestParams := dto.UpdateTodoRequest{}
-	if err := ctx.ShouldBind(&requestParams); err != nil {
-		return &dto.UpdateTodoResponse{Todo: models.Todo{}, Error: err, ErrorType: "internalServerError"}
-	}
 	todo.Title = requestParams.Title
 	todo.Content = requestParams.Content
 	// NOTE: バリデーションチェック
@@ -105,18 +82,13 @@ func (ts *todoService) UpdateTodo(ctx *gin.Context, userId int) *dto.UpdateTodoR
 
 	// NOTE: Update処理
 	updateError := ts.todoRepository.UpdateTodo(&todo)
-	if err != nil {
+	if updateError != nil {
 		return &dto.UpdateTodoResponse{Todo: todo, Error: updateError, ErrorType: "internalServerError"}
 	}
 	return &dto.UpdateTodoResponse{Todo: todo, Error: nil, ErrorType: ""}
 }
 
-func (ts *todoService) DeleteTodo(ctx *gin.Context, userId int) *dto.DeleteTodoResponse {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		return &dto.DeleteTodoResponse{Error: err, ErrorType: "internalServerError"}
-	}
-
+func (ts *todoService) DeleteTodo(id int, userId int) *dto.DeleteTodoResponse {
 	todo := models.Todo{}
 	error := ts.todoRepository.GetTodoById(&todo, id, userId)
 	if error != nil {
@@ -125,7 +97,7 @@ func (ts *todoService) DeleteTodo(ctx *gin.Context, userId int) *dto.DeleteTodoR
 
 	deleteError := ts.todoRepository.DeleteTodo(&todo)
 	if deleteError != nil {
-		return &dto.DeleteTodoResponse{Error: err, ErrorType: "internalServerError"}
+		return &dto.DeleteTodoResponse{Error: deleteError, ErrorType: "internalServerError"}
 	}
 	return &dto.DeleteTodoResponse{Error: nil, ErrorType: ""}
 }

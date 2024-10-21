@@ -1,8 +1,6 @@
 package db
 
 import (
-	"app/config"
-
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -13,15 +11,8 @@ var (
 )
 
 func Init() *gorm.DB {
-	dsn := config.Config.DbUserName +
-		":" +
-		config.Config.DbUserPassword +
-		"@tcp(" + config.Config.DbHost + ":" + config.Config.DbPort + ")/" +
-		config.Config.DbName +
-		"?charset=utf8mb4&parseTime=true&loc=Local"
-
 	// DBインスタンス生成
-	Db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	Db, err = gorm.Open(mysql.Open(GetDsn()), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

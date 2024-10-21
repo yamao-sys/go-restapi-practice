@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"app/dto"
 	"app/services"
 	"app/utils"
 	"net/http"
@@ -22,7 +23,15 @@ func NewAuthController(authService services.AuthService) AuthController {
 }
 
 func (authController *authController) SignUp(ctx *gin.Context) {
-	result := authController.authService.SignUp(ctx)
+	// NOTE: リクエストデータを構造体に変換
+	requestParams := dto.SignUpRequest{}
+	if err := ctx.ShouldBind(&requestParams); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err,
+		})
+		return
+	}
+	result := authController.authService.SignUp(requestParams)
 
 	if result.Error == nil {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -44,7 +53,14 @@ func (authController *authController) SignUp(ctx *gin.Context) {
 }
 
 func (authController *authController) SignIn(ctx *gin.Context) {
-	result := authController.authService.SignIn(ctx)
+	requestParams := dto.SignInRequest{}
+	if err := ctx.ShouldBind(&requestParams); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err,
+		})
+		return
+	}
+	result := authController.authService.SignIn(requestParams)
 
 	if result.NotFoundMessage != "" {
 		ctx.JSON(http.StatusNotFound, gin.H{

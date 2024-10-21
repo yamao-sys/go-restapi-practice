@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"app/dto"
 	"app/services"
 	"app/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +34,14 @@ func (todoController *todoController) Create(ctx *gin.Context) {
 		return
 	}
 
-	result := todoController.todoService.CreateTodo(ctx, user.ID)
+	// NOTE: リクエストデータを構造体に変換
+	requestParams := dto.CreateTodoRequest{}
+	if err := ctx.ShouldBind(&requestParams); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	result := todoController.todoService.CreateTodo(requestParams, user.ID)
 
 	if result.Error == nil {
 		ctx.JSON(http.StatusOK, gin.H{"todo": result.Todo})
@@ -54,7 +63,7 @@ func (todoController *todoController) Index(ctx *gin.Context) {
 		return
 	}
 
-	result := todoController.todoService.FetchTodosList(ctx, user.ID)
+	result := todoController.todoService.FetchTodosList(user.ID)
 
 	if result.Error == nil {
 		ctx.JSON(http.StatusOK, gin.H{"todos": result.Todos})
@@ -76,7 +85,8 @@ func (todoController *todoController) Show(ctx *gin.Context) {
 		return
 	}
 
-	result := todoController.todoService.FetchTodo(ctx, user.ID)
+	id, err := strconv.Atoi(ctx.Param("id"))
+	result := todoController.todoService.FetchTodo(id, user.ID)
 
 	if result.Error == nil {
 		ctx.JSON(http.StatusOK, gin.H{"todo": result.Todo})
@@ -98,7 +108,14 @@ func (todoController *todoController) Update(ctx *gin.Context) {
 		return
 	}
 
-	result := todoController.todoService.UpdateTodo(ctx, user.ID)
+	id, err := strconv.Atoi(ctx.Param("id"))
+	// NOTE: リクエストデータを構造体に変換
+	requestParams := dto.UpdateTodoRequest{}
+	if err := ctx.ShouldBind(&requestParams); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+	result := todoController.todoService.UpdateTodo(id, requestParams, user.ID)
 
 	if result.Error == nil {
 		ctx.JSON(http.StatusOK, gin.H{"todo": result.Todo})
@@ -121,7 +138,8 @@ func (todoController *todoController) Delete(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized error"})
 		return
 	}
-	result := todoController.todoService.DeleteTodo(ctx, user.ID)
+	id, err := strconv.Atoi(ctx.Param("id"))
+	result := todoController.todoService.DeleteTodo(id, user.ID)
 
 	if result.Error == nil {
 		ctx.JSON(http.StatusOK, gin.H{"result": "delete todo(ID: " + ctx.Param("id") + ") successfully"})
