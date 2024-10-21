@@ -9,11 +9,11 @@ import (
 )
 
 type TodoService interface {
-	CreateTodo(requestParams dto.CreateTodoRequest, userId int) *dto.CreateTodoResponse
-	FetchTodosList(userId int) *dto.TodosListResponse
-	FetchTodo(id int, userId int) *dto.FetchTodoResponse
-	UpdateTodo(id int, requestParams dto.UpdateTodoRequest, userId int) *dto.UpdateTodoResponse
-	DeleteTodo(id int, userId int) *dto.DeleteTodoResponse
+	CreateTodo(requestParams dto.CreateTodoRequest, userID int) *dto.CreateTodoResponse
+	FetchTodosList(userID int) *dto.TodosListResponse
+	FetchTodo(id int, userID int) *dto.FetchTodoResponse
+	UpdateTodo(id int, requestParams dto.UpdateTodoRequest, userID int) *dto.UpdateTodoResponse
+	DeleteTodo(id int, userID int) *dto.DeleteTodoResponse
 }
 
 type todoService struct {
@@ -24,11 +24,11 @@ func NewTodoService(todoRepository repositories.TodoRepository) TodoService {
 	return &todoService{todoRepository}
 }
 
-func (ts *todoService) CreateTodo(requestParams dto.CreateTodoRequest, userId int) *dto.CreateTodoResponse {
+func (ts *todoService) CreateTodo(requestParams dto.CreateTodoRequest, userID int) *dto.CreateTodoResponse {
 	todo := models.Todo{}
 	todo.Title = requestParams.Title
 	todo.Content = requestParams.Content
-	todo.UserID = userId
+	todo.UserID = userID
 	// NOTE: バリデーションチェック
 	validate := validator.New()
 	validationErrors := validate.Struct(todo)
@@ -44,9 +44,9 @@ func (ts *todoService) CreateTodo(requestParams dto.CreateTodoRequest, userId in
 	return &dto.CreateTodoResponse{Todo: todo, Error: nil, ErrorType: ""}
 }
 
-func (ts *todoService) FetchTodosList(userId int) *dto.TodosListResponse {
+func (ts *todoService) FetchTodosList(userID int) *dto.TodosListResponse {
 	todos := []models.Todo{}
-	error := ts.todoRepository.GetAllTodos(&todos, userId)
+	error := ts.todoRepository.GetAllTodos(&todos, userID)
 	if error != nil {
 		return &dto.TodosListResponse{Todos: []models.Todo{}, Error: error, ErrorType: "notFound"}
 	}
@@ -54,9 +54,9 @@ func (ts *todoService) FetchTodosList(userId int) *dto.TodosListResponse {
 	return &dto.TodosListResponse{Todos: todos, Error: nil, ErrorType: ""}
 }
 
-func (ts *todoService) FetchTodo(id int, userId int) *dto.FetchTodoResponse {
+func (ts *todoService) FetchTodo(id int, userID int) *dto.FetchTodoResponse {
 	todo := models.Todo{}
-	error := ts.todoRepository.GetTodoById(&todo, id, userId)
+	error := ts.todoRepository.GetTodoByID(&todo, id, userID)
 	if error != nil {
 		return &dto.FetchTodoResponse{Todo: models.Todo{}, Error: error, ErrorType: "notFound"}
 	}
@@ -64,9 +64,9 @@ func (ts *todoService) FetchTodo(id int, userId int) *dto.FetchTodoResponse {
 	return &dto.FetchTodoResponse{Todo: todo, Error: nil, ErrorType: ""}
 }
 
-func (ts *todoService) UpdateTodo(id int, requestParams dto.UpdateTodoRequest, userId int) *dto.UpdateTodoResponse {
+func (ts *todoService) UpdateTodo(id int, requestParams dto.UpdateTodoRequest, userID int) *dto.UpdateTodoResponse {
 	todo := models.Todo{}
-	error := ts.todoRepository.GetTodoById(&todo, id, userId)
+	error := ts.todoRepository.GetTodoByID(&todo, id, userID)
 	if error != nil {
 		return &dto.UpdateTodoResponse{Todo: models.Todo{}, Error: error, ErrorType: "notFound"}
 	}
@@ -88,9 +88,9 @@ func (ts *todoService) UpdateTodo(id int, requestParams dto.UpdateTodoRequest, u
 	return &dto.UpdateTodoResponse{Todo: todo, Error: nil, ErrorType: ""}
 }
 
-func (ts *todoService) DeleteTodo(id int, userId int) *dto.DeleteTodoResponse {
+func (ts *todoService) DeleteTodo(id int, userID int) *dto.DeleteTodoResponse {
 	todo := models.Todo{}
-	error := ts.todoRepository.GetTodoById(&todo, id, userId)
+	error := ts.todoRepository.GetTodoByID(&todo, id, userID)
 	if error != nil {
 		return &dto.DeleteTodoResponse{Error: error, ErrorType: "notFound"}
 	}

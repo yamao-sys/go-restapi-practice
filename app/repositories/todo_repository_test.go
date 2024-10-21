@@ -12,21 +12,21 @@ import (
 var user *models.User
 
 type TestTodoRePositorySuite struct {
-	WithDbSuite
+	WithDBSuite
 }
 
 func (s *TestTodoRePositorySuite) SetupTest() {
-	s.SetDbCon()
+	s.SetDBCon()
 
 	// NOTE: テスト用ユーザの作成
 	user = factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
-	if err := DbCon.Create(&user).Error; err != nil {
+	if err := DBCon.Create(&user).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}
 }
 
 func (s *TestTodoRePositorySuite) TearDownTest() {
-	s.CloseDb()
+	s.CloseDB()
 }
 
 func (s *TestTodoRePositorySuite) TestCreateTodo() {
@@ -35,7 +35,7 @@ func (s *TestTodoRePositorySuite) TestCreateTodo() {
 	insertTodo.Content = "test content 1"
 	insertTodo.UserID = user.ID
 
-	tr := NewTodoRepository(DbCon)
+	tr := NewTodoRepository(DBCon)
 	err := tr.CreateTodo(&insertTodo)
 
 	assert.Nil(s.T(), err)
@@ -55,29 +55,29 @@ func (s *TestTodoRePositorySuite) TestGetAllTodos() {
 			UserID:  user.ID,
 		},
 	}
-	if err := DbCon.Create(&insertTodos).Error; err != nil {
+	if err := DBCon.Create(&insertTodos).Error; err != nil {
 		s.T().Fatalf("failed to create test todos %v", err)
 	}
 
 	todos := []models.Todo{}
-	tr := NewTodoRepository(DbCon)
+	tr := NewTodoRepository(DBCon)
 	tr.GetAllTodos(&todos, user.ID)
 
 	assert.Equal(s.T(), 2, len(todos))
 }
 
-func (s *TestTodoRePositorySuite) TestGetTodoById() {
+func (s *TestTodoRePositorySuite) TestGetTodoByID() {
 	insertTodo := models.Todo{}
 	insertTodo.Title = "test title 1"
 	insertTodo.Content = "test content 1"
 	insertTodo.UserID = user.ID
-	if err := DbCon.Create(&insertTodo).Error; err != nil {
+	if err := DBCon.Create(&insertTodo).Error; err != nil {
 		s.T().Fatalf("failed to create test todo %v", err)
 	}
 
 	todo := models.Todo{}
-	tr := NewTodoRepository(DbCon)
-	err := tr.GetTodoById(&todo, insertTodo.ID, user.ID)
+	tr := NewTodoRepository(DBCon)
+	err := tr.GetTodoByID(&todo, insertTodo.ID, user.ID)
 
 	assert.Nil(s.T(), err)
 	assert.Equal(s.T(), insertTodo.ID, todo.ID)
@@ -85,13 +85,13 @@ func (s *TestTodoRePositorySuite) TestGetTodoById() {
 
 func (s *TestTodoRePositorySuite) TestUpdateTodo() {
 	todo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
-	if err := DbCon.Create(&todo).Error; err != nil {
+	if err := DBCon.Create(&todo).Error; err != nil {
 		s.T().Fatalf("failed to create test todo %v", err)
 	}
 	assert.Equal(s.T(), "test title 1", todo.Title)
 	assert.Equal(s.T(), "test content 1", todo.Content)
 
-	tr := NewTodoRepository(DbCon)
+	tr := NewTodoRepository(DBCon)
 	todo.Title = "test updated title 1"
 	todo.Content = "test updated content 1"
 	err := tr.UpdateTodo(&todo)
@@ -103,12 +103,12 @@ func (s *TestTodoRePositorySuite) TestUpdateTodo() {
 
 func (s *TestTodoRePositorySuite) TestDeleteTodo() {
 	todo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
-	if err := DbCon.Create(&todo).Error; err != nil {
+	if err := DBCon.Create(&todo).Error; err != nil {
 		s.T().Fatalf("failed to create test todo %v", err)
 	}
 
 	todos := []models.Todo{}
-	tr := NewTodoRepository(DbCon)
+	tr := NewTodoRepository(DBCon)
 	tr.GetAllTodos(&todos, user.ID)
 	assert.Equal(s.T(), 1, len(todos))
 

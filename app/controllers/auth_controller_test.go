@@ -21,13 +21,13 @@ var (
 )
 
 type TestAuthControllerSuite struct {
-	WithDbSuite
+	WithDBSuite
 }
 
 func (s *TestAuthControllerSuite) SetupTest() {
-	s.SetDbCon()
+	s.SetDBCon()
 
-	userRepository := repositories.NewUserRepository(DbCon)
+	userRepository := repositories.NewUserRepository(DBCon)
 
 	authService := services.NewAuthService(userRepository)
 
@@ -36,7 +36,7 @@ func (s *TestAuthControllerSuite) SetupTest() {
 }
 
 func (s *TestAuthControllerSuite) TearDownTest() {
-	s.CloseDb()
+	s.CloseDB()
 }
 
 func (s *TestAuthControllerSuite) TestSignUp() {
@@ -54,7 +54,7 @@ func (s *TestAuthControllerSuite) TestSignUp() {
 
 	// NOTE: ユーザが作成されていることを確認
 	user := models.User{}
-	if err := DbCon.Where("email = ?", "test@example.com").First(&user).Error; err != nil {
+	if err := DBCon.Where("email = ?", "test@example.com").First(&user).Error; err != nil {
 		s.T().Fatalf("failed to create todo %v", err)
 	}
 	assert.Equal(s.T(), "test name 1", user.Name)
@@ -72,14 +72,14 @@ func (s *TestAuthControllerSuite) TestSignUp_ValidationError() {
 
 	// NOTE: ユーザが作成されていないことを確認
 	user := models.User{}
-	err := DbCon.Where("email = ?", "test@example.com").First(&user).Error
+	err := DBCon.Where("email = ?", "test@example.com").First(&user).Error
 	assert.NotNil(s.T(), err)
 }
 
 func (s *TestAuthControllerSuite) TestSignIn() {
 	// NOTE: テスト用ユーザの作成
 	user := factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
-	if err := DbCon.Create(&user).Error; err != nil {
+	if err := DBCon.Create(&user).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}
 
@@ -98,7 +98,7 @@ func (s *TestAuthControllerSuite) TestSignIn() {
 func (s *TestAuthControllerSuite) TestSignIn_NotFoundError() {
 	// NOTE: テスト用ユーザの作成
 	user := factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
-	if err := DbCon.Create(&user).Error; err != nil {
+	if err := DBCon.Create(&user).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}
 

@@ -12,20 +12,20 @@ import (
 )
 
 type TestAuthServiceSuite struct {
-	WithDbSuite
+	WithDBSuite
 }
 
 var testAuthService AuthService
 
 func (s *TestAuthServiceSuite) SetupTest() {
-	s.SetDbCon()
+	s.SetDBCon()
 
-	userRepository := repositories.NewUserRepository(DbCon)
+	userRepository := repositories.NewUserRepository(DBCon)
 	testAuthService = NewAuthService(userRepository)
 }
 
 func (s *TestAuthServiceSuite) TearDownTest() {
-	s.CloseDb()
+	s.CloseDB()
 }
 
 func (s *TestAuthServiceSuite) TestSignUp() {
@@ -38,7 +38,7 @@ func (s *TestAuthServiceSuite) TestSignUp() {
 
 	// NOTE: ユーザが作成されていることを確認
 	user := models.User{}
-	if err := DbCon.First(&user).Error; err != nil {
+	if err := DBCon.First(&user).Error; err != nil {
 		s.T().Fatalf("failed to create user %v", err)
 	}
 	assert.Equal(s.T(), "test name 1", user.Name)
@@ -55,14 +55,14 @@ func (s *TestAuthServiceSuite) TestSignUp_ValidationError() {
 
 	// NOTE: ユーザが作成されていないことを確認
 	user := models.User{}
-	err := DbCon.First(&user).Error
+	err := DBCon.First(&user).Error
 	assert.NotNil(s.T(), err)
 }
 
 func (s *TestAuthServiceSuite) TestSignIn() {
 	// NOTE: テスト用ユーザの作成
 	user := factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
-	if err := DbCon.Create(&user).Error; err != nil {
+	if err := DBCon.Create(&user).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}
 
@@ -78,7 +78,7 @@ func (s *TestAuthServiceSuite) TestSignIn() {
 func (s *TestAuthServiceSuite) TestSignIn_NotFoundError() {
 	// NOTE: テスト用ユーザの作成
 	user := factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
-	if err := DbCon.Create(&user).Error; err != nil {
+	if err := DBCon.Create(&user).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}
 
