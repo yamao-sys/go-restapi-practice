@@ -1,10 +1,10 @@
 package config
 
 import (
-	"log"
 	"os"
+	"strconv"
 
-	"gopkg.in/go-ini/ini.v1"
+	"github.com/joho/godotenv"
 )
 
 type ConfigList struct {
@@ -20,25 +20,22 @@ type ConfigList struct {
 var Config ConfigList
 
 func init() {
-	var iniFilePath string
-	if os.Getenv("ENVIRONMENT") != "" {
-		iniFilePath = "/app/config." + os.Getenv("ENVIRONMENT") + ".ini"
+	var envFilePath string
+	if os.Getenv("ENV") != "" {
+		envFilePath = "/app/.env." + os.Getenv("ENV")
 	} else {
-		iniFilePath = "/app/config.ini"
+		envFilePath = "/app/.env.development"
 	}
-	cfg, err := ini.Load(iniFilePath)
-	if err != nil {
-		log.Fatalln(err)
-		os.Exit(1)
-	}
+	godotenv.Load(envFilePath)
 
+	serverPort, _ := strconv.Atoi(os.Getenv("SERVER_PORT"))
 	Config = ConfigList{
-		DbDriverName:   cfg.Section("db").Key("db_driver_name").String(),
-		DbName:         cfg.Section("db").Key("db_name").String(),
-		DbUserName:     cfg.Section("db").Key("db_user_name").String(),
-		DbUserPassword: cfg.Section("db").Key("db_user_password").String(),
-		DbHost:         cfg.Section("db").Key("db_host").String(),
-		DbPort:         cfg.Section("db").Key("db_port").String(),
-		ServerPort:     cfg.Section("api").Key("server_port").MustInt(),
+		DbDriverName:   os.Getenv("DB_DRIVER_NAME"),
+		DbName:         os.Getenv("DB_NAME"),
+		DbUserName:     os.Getenv("DB_USER_NAME"),
+		DbUserPassword: os.Getenv("DB_USER_PASSWORD"),
+		DbHost:         os.Getenv("DB_HOST"),
+		DbPort:         os.Getenv("DB_PORT"),
+		ServerPort:     serverPort,
 	}
 }
