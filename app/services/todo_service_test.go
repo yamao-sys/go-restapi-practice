@@ -70,16 +70,8 @@ func (s *TestTodoServiceSuite) TestCreateTodo_ValidationError() {
 
 func (s *TestTodoServiceSuite) TestFetchTodosList() {
 	testTodos := []models.Todo{
-		{
-			Title:   "test title 1",
-			Content: "test content 1",
-			UserID:  user.ID,
-		},
-		{
-			Title:   "test title 2",
-			Content: "test content 2",
-			UserID:  user.ID,
-		},
+		{Title: "test title 1", Content: "test content 1", UserID: user.ID},
+		{Title: "test title 2", Content: "test content 2", UserID: user.ID},
 	}
 	if err := DbCon.Create(&testTodos).Error; err != nil {
 		s.T().Fatalf("failed to create test todos %v", err)

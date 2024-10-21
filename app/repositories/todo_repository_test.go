@@ -84,10 +84,7 @@ func (s *TestTodoRePositorySuite) TestGetTodoById() {
 }
 
 func (s *TestTodoRePositorySuite) TestUpdateTodo() {
-	todo := models.Todo{}
-	todo.Title = "test title 1"
-	todo.Content = "test content 1"
-	todo.UserID = user.ID
+	todo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
 	if err := DbCon.Create(&todo).Error; err != nil {
 		s.T().Fatalf("failed to create test todo %v", err)
 	}
@@ -105,10 +102,7 @@ func (s *TestTodoRePositorySuite) TestUpdateTodo() {
 }
 
 func (s *TestTodoRePositorySuite) TestDeleteTodo() {
-	todo := models.Todo{}
-	todo.Title = "test title 1"
-	todo.Content = "test content 1"
-	todo.UserID = user.ID
+	todo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
 	if err := DbCon.Create(&todo).Error; err != nil {
 		s.T().Fatalf("failed to create test todo %v", err)
 	}
