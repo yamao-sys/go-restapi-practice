@@ -4,13 +4,14 @@ go 1.23.1
 
 require (
 	github.com/DATA-DOG/go-txdb v0.2.0
+	github.com/Pallinder/go-randomdata v1.2.0
+	github.com/bluele/factory-go v0.0.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.28.0
-	gopkg.in/go-ini/ini.v1 v1.67.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
 )
