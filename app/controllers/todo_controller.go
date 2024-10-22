@@ -147,10 +147,10 @@ func (todoController *todoController) Delete(ctx *gin.Context) {
 		return
 	}
 	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-		return
-	}
+	// if err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+	// 	return
+	// }
 	result := todoController.todoService.DeleteTodo(id, user.ID)
 
 	if result.Error == nil {
