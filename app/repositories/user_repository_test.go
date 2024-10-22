@@ -11,15 +11,15 @@ import (
 )
 
 type TestUserRePositorySuite struct {
-	WithDbSuite
+	WithDBSuite
 }
 
 func (s *TestUserRePositorySuite) SetupTest() {
-	s.SetDbCon()
+	s.SetDBCon()
 }
 
 func (s *TestUserRePositorySuite) TearDownTest() {
-	s.CloseDb()
+	s.CloseDB()
 }
 
 func (s *TestUserRePositorySuite) TestCreateUser() {
@@ -32,7 +32,7 @@ func (s *TestUserRePositorySuite) TestCreateUser() {
 	}
 	user.Password = string(hash)
 
-	ur := NewUserRepository(DbCon)
+	ur := NewUserRepository(DBCon)
 	ur.CreateUser(&user)
 
 	assert.NotEqual(s.T(), 0, user.ID)
@@ -40,25 +40,25 @@ func (s *TestUserRePositorySuite) TestCreateUser() {
 
 func (s *TestUserRePositorySuite) TestFindUserByEmail() {
 	testUser := factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
-	if err := DbCon.Create(&testUser).Error; err != nil {
+	if err := DBCon.Create(&testUser).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}
 
 	user := models.User{}
-	ur := NewUserRepository(DbCon)
+	ur := NewUserRepository(DBCon)
 	ur.FindUserByEmail(&user, "test@example.com")
 
 	assert.Equal(s.T(), testUser.ID, user.ID)
 }
 
-func (s *TestUserRePositorySuite) TestFindUserById() {
+func (s *TestUserRePositorySuite) TestFindUserByID() {
 	testUser := factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
-	if err := DbCon.Create(&testUser).Error; err != nil {
+	if err := DBCon.Create(&testUser).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}
 
-	ur := NewUserRepository(DbCon)
-	user := ur.FindUserById(testUser.ID)
+	ur := NewUserRepository(DBCon)
+	user := ur.FindUserByID(testUser.ID)
 
 	assert.Equal(s.T(), testUser.Name, user.Name)
 }

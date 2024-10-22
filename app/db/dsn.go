@@ -5,10 +5,10 @@ import (
 )
 
 func GetDsn() string {
-	return config.Config.DbUserName +
+	return config.Config.DBUserName +
 		":" +
-		config.Config.DbUserPassword +
-		"@tcp(" + config.Config.DbHost + ":" + config.Config.DbPort + ")/" +
-		config.Config.DbName +
+		config.Config.DBUserPassword +
+		"@tcp(" + config.Config.DBHost + ":" + config.Config.DBPort + ")/" +
+		config.Config.DBName +
 		"?charset=utf8mb4&parseTime=true&loc=Local"
 }

@@ -89,19 +89,23 @@ func (as *authService) GetAuthUser(ctx *gin.Context) (models.User, error) {
 
 		return []byte("abcdefghijklmn"), nil
 	})
-	var userId int
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userId = int(claims["user_id"].(float64))
+	if err != nil {
+		return models.User{}, fmt.Errorf("failt jwt parse")
 	}
-	if userId == 0 {
+
+	var userID int
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID = int(claims["user_id"].(float64))
+	}
+	if userID == 0 {
 		return models.User{}, fmt.Errorf("invalid token")
 	}
 
-	return as.userRepository.FindUserById(userId), nil
+	return as.userRepository.FindUserByID(userID), nil
 }
 
 func (as *authService) Getuser(id int) models.User {
-	return as.userRepository.FindUserById(id)
+	return as.userRepository.FindUserByID(id)
 }
 
 // NOTE: パスワードの文字列をハッシュ化する

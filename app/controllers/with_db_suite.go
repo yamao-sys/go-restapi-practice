@@ -17,33 +17,33 @@ import (
 	"gorm.io/gorm"
 )
 
-type WithDbSuite struct {
+type WithDBSuite struct {
 	suite.Suite
 }
 
 var (
-	DbCon *gorm.DB
+	DBCon *gorm.DB
 	token string
 )
 
-// func (s *WithDbSuite) SetupSuite()                           {} // テストスイート実施前の処理
-// func (s *WithDbSuite) TearDownSuite()                        {} // テストスイート終了後の処理
-// func (s *WithDbSuite) SetupTest()                            {} // テストケース実施前の処理
-// func (s *WithDbSuite) TearDownTest()                         {} // テストケース終了後の処理
-// func (s *WithDbSuite) BeforeTest(suiteName, testName string) {} // テストケース実施前の処理
-// func (s *WithDbSuite) AfterTest(suiteName, testName string)  {} // テストケース終了後の処理
+// func (s *WithDBSuite) SetupSuite()                           {} // テストスイート実施前の処理
+// func (s *WithDBSuite) TearDownSuite()                        {} // テストスイート終了後の処理
+// func (s *WithDBSuite) SetupTest()                            {} // テストケース実施前の処理
+// func (s *WithDBSuite) TearDownTest()                         {} // テストケース終了後の処理
+// func (s *WithDBSuite) BeforeTest(suiteName, testName string) {} // テストケース実施前の処理
+// func (s *WithDBSuite) AfterTest(suiteName, testName string)  {} // テストケース終了後の処理
 
 func init() {
 	txdb.Register("txdb-controller", "mysql", db.GetDsn())
 }
 
-func (s *WithDbSuite) SetDbCon() {
+func (s *WithDBSuite) SetDBCon() {
 	db, err := sql.Open("txdb-controller", "connect")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	DbCon, err = gorm.Open(mysql.New(mysql.Config{
+	DBCon, err = gorm.Open(mysql.New(mysql.Config{
 		Conn: db,
 	}), &gorm.Config{})
 	if err != nil {
@@ -51,13 +51,13 @@ func (s *WithDbSuite) SetDbCon() {
 	}
 }
 
-func (s *WithDbSuite) CloseDb() {
-	db, _ := DbCon.DB()
+func (s *WithDBSuite) CloseDB() {
+	db, _ := DBCon.DB()
 	db.Close()
 }
 
-func (s *WithDbSuite) signIn() {
-	userRepository := repositories.NewUserRepository(DbCon)
+func (s *WithDBSuite) SignIn() {
+	userRepository := repositories.NewUserRepository(DBCon)
 	authService := services.NewAuthService(userRepository)
 	authController := NewAuthController(authService)
 

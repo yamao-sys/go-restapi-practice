@@ -10,7 +10,7 @@ import (
 type UserRepository interface {
 	CreateUser(user *models.User) error
 	FindUserByEmail(user *models.User, email string) error
-	FindUserById(id int) models.User
+	FindUserByID(id int) models.User
 }
 
 type userRepository struct {
@@ -35,7 +35,7 @@ func (ur *userRepository) FindUserByEmail(user *models.User, email string) error
 	return nil
 }
 
-func (ur *userRepository) FindUserById(id int) models.User {
+func (ur *userRepository) FindUserByID(id int) models.User {
 	user := models.User{}
 	if err := ur.db.Where("id = ?", id).First(&user).Error; err != nil {
 		log.Fatalln(err)

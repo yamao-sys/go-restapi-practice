@@ -6,4 +6,5 @@ WORKDIR /app
 
 COPY . .
 
-RUN go install golang.org/x/tools/cmd/goimports@latest
+RUN go mod tidy && \
+	go install honnef.co/go/tools/cmd/staticcheck@latest

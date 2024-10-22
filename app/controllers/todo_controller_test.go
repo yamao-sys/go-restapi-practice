@@ -23,20 +23,20 @@ var (
 )
 
 type TestTodoControllerSuite struct {
-	WithDbSuite
+	WithDBSuite
 }
 
 func (s *TestTodoControllerSuite) SetupTest() {
-	s.SetDbCon()
+	s.SetDBCon()
 
 	// NOTE: テスト用ユーザの作成
 	user = factories.UserFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.User)
-	if err := DbCon.Create(&user).Error; err != nil {
+	if err := DBCon.Create(&user).Error; err != nil {
 		s.T().Fatalf("failed to create test user %v", err)
 	}
 
-	userRepository := repositories.NewUserRepository(DbCon)
-	todoRepository := repositories.NewTodoRepository(DbCon)
+	userRepository := repositories.NewUserRepository(DBCon)
+	todoRepository := repositories.NewTodoRepository(DBCon)
 
 	authService := services.NewAuthService(userRepository)
 	todoService := services.NewTodoService(todoRepository)
@@ -45,11 +45,11 @@ func (s *TestTodoControllerSuite) SetupTest() {
 	testTodoController = NewTodoController(todoService, authService)
 
 	// NOTE: ログインし、tokenに値を格納
-	s.signIn()
+	s.SignIn()
 }
 
 func (s *TestTodoControllerSuite) TearDownTest() {
-	s.CloseDb()
+	s.CloseDB()
 }
 
 func (s *TestTodoControllerSuite) TestCreateTodo() {
@@ -68,7 +68,7 @@ func (s *TestTodoControllerSuite) TestCreateTodo() {
 
 	// NOTE: Todoリストが作成されていることを確認
 	todo := models.Todo{}
-	if err := DbCon.Where("user_id = ?", user.ID).First(&todo).Error; err != nil {
+	if err := DBCon.Where("user_id = ?", user.ID).First(&todo).Error; err != nil {
 		s.T().Fatalf("failed to create todo %v", err)
 	}
 	assert.Equal(s.T(), "test title 1", todo.Title)
@@ -88,7 +88,7 @@ func (s *TestTodoControllerSuite) TestCreateTodo_ValidationError() {
 
 	// NOTE: Todoリストが作成されていないことを確認
 	todo := models.Todo{}
-	err := DbCon.Where("user_id = ?", user.ID).First(&todo).Error
+	err := DBCon.Where("user_id = ?", user.ID).First(&todo).Error
 	assert.NotNil(s.T(), err)
 }
 
@@ -98,7 +98,7 @@ func (s *TestTodoControllerSuite) TestIndex() {
 		{Title: "test title 1", Content: "test content 1", UserID: user.ID},
 		{Title: "test title 2", Content: "test content 2", UserID: user.ID},
 	}
-	if err := DbCon.Create(&todos).Error; err != nil {
+	if err := DBCon.Create(&todos).Error; err != nil {
 		s.T().Fatalf("failed to create test todos %v", err)
 	}
 
@@ -117,16 +117,16 @@ func (s *TestTodoControllerSuite) TestIndex() {
 func (s *TestTodoControllerSuite) TestShow() {
 	// NOTE: Todoのデータを作っておく
 	todo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
-	if err := DbCon.Create(&todo).Error; err != nil {
+	if err := DBCon.Create(&todo).Error; err != nil {
 		s.T().Fatalf("failed to create test todo %v", err)
 	}
 
 	res := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(res)
-	todoId := strconv.Itoa(todo.ID)
-	param := gin.Param{Key: "id", Value: todoId}
+	todoID := strconv.Itoa(todo.ID)
+	param := gin.Param{Key: "id", Value: todoID}
 	c.Params = gin.Params{param}
-	c.Request, _ = http.NewRequest(http.MethodGet, "/todos/"+todoId, nil)
+	c.Request, _ = http.NewRequest(http.MethodGet, "/todos/"+todoID, nil)
 	c.Request.Header.Set("Cookie", "token="+token)
 	testTodoController.Show(c)
 
@@ -136,17 +136,17 @@ func (s *TestTodoControllerSuite) TestShow() {
 func (s *TestTodoControllerSuite) TestUpdate() {
 	// NOTE: Todoのデータを作っておく
 	todo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
-	if err := DbCon.Create(&todo).Error; err != nil {
+	if err := DBCon.Create(&todo).Error; err != nil {
 		s.T().Fatalf("failed to create test todo %v", err)
 	}
 
 	res := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(res)
-	todoId := strconv.Itoa(todo.ID)
-	param := gin.Param{Key: "id", Value: todoId}
+	todoID := strconv.Itoa(todo.ID)
+	param := gin.Param{Key: "id", Value: todoID}
 	c.Params = gin.Params{param}
 	updateTodoBody := bytes.NewBufferString("{\"title\":\"test updated title 1\",\"content\":\"test updated content 1\"}")
-	c.Request, _ = http.NewRequest(http.MethodPut, "/todos/"+todoId, updateTodoBody)
+	c.Request, _ = http.NewRequest(http.MethodPut, "/todos/"+todoID, updateTodoBody)
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Request.Header.Set("Cookie", "token="+token)
 	testTodoController.Update(c)
@@ -154,7 +154,7 @@ func (s *TestTodoControllerSuite) TestUpdate() {
 	assert.Equal(s.T(), 200, res.Code)
 	// NOTE: Todoリストが更新されていることを確認
 	updatedTodo := models.Todo{}
-	if err := DbCon.Where("user_id = ?", user.ID).First(&updatedTodo).Error; err != nil {
+	if err := DBCon.Where("user_id = ?", user.ID).First(&updatedTodo).Error; err != nil {
 		s.T().Fatalf("failed to create todo %v", err)
 	}
 	assert.Equal(s.T(), "test updated title 1", updatedTodo.Title)
@@ -164,17 +164,17 @@ func (s *TestTodoControllerSuite) TestUpdate() {
 func (s *TestTodoControllerSuite) TestUpdateTodo_ValidationError() {
 	// NOTE: Todoのデータを作っておく
 	todo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
-	if err := DbCon.Create(&todo).Error; err != nil {
+	if err := DBCon.Create(&todo).Error; err != nil {
 		s.T().Fatalf("failed to create test todo %v", err)
 	}
 
 	res := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(res)
-	todoId := strconv.Itoa(todo.ID)
-	param := gin.Param{Key: "id", Value: todoId}
+	todoID := strconv.Itoa(todo.ID)
+	param := gin.Param{Key: "id", Value: todoID}
 	c.Params = gin.Params{param}
 	updateTodoBody := bytes.NewBufferString("{\"title\":\"\",\"content\":\"test content 1\"}")
-	c.Request, _ = http.NewRequest(http.MethodPost, "/todos/"+todoId, updateTodoBody)
+	c.Request, _ = http.NewRequest(http.MethodPost, "/todos/"+todoID, updateTodoBody)
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Request.Header.Set("Cookie", "token="+token)
 	testTodoController.Create(c)
@@ -183,7 +183,7 @@ func (s *TestTodoControllerSuite) TestUpdateTodo_ValidationError() {
 
 	// NOTE: Todoが更新されていないこと
 	updatedTodo := models.Todo{}
-	if err := DbCon.Where("user_id = ?", user.ID).First(&updatedTodo).Error; err != nil {
+	if err := DBCon.Where("user_id = ?", user.ID).First(&updatedTodo).Error; err != nil {
 		s.T().Fatalf("failed to create todo %v", err)
 	}
 	assert.Equal(s.T(), "test title 1", updatedTodo.Title)
@@ -192,23 +192,23 @@ func (s *TestTodoControllerSuite) TestUpdateTodo_ValidationError() {
 func (s *TestTodoControllerSuite) TestDelete() {
 	// NOTE: Todoのデータを作っておく
 	todo := models.Todo{Title: "test title 1", Content: "test content 1", UserID: user.ID}
-	if err := DbCon.Create(&todo).Error; err != nil {
+	if err := DBCon.Create(&todo).Error; err != nil {
 		s.T().Fatalf("failed to create test todo %v", err)
 	}
 
 	res := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(res)
-	todoId := strconv.Itoa(todo.ID)
-	param := gin.Param{Key: "id", Value: todoId}
+	todoID := strconv.Itoa(todo.ID)
+	param := gin.Param{Key: "id", Value: todoID}
 	c.Params = gin.Params{param}
-	c.Request, _ = http.NewRequest(http.MethodDelete, "/todos/"+todoId, nil)
+	c.Request, _ = http.NewRequest(http.MethodDelete, "/todos/"+todoID, nil)
 	c.Request.Header.Set("Cookie", "token="+token)
 	testTodoController.Delete(c)
 
 	assert.Equal(s.T(), 200, res.Code)
 	// NOTE: Todoリストが削除されていることを確認
 	deletedTodo := models.Todo{}
-	err := DbCon.Where("user_id = ?", user.ID).First(&deletedTodo).Error
+	err := DBCon.Where("user_id = ?", user.ID).First(&deletedTodo).Error
 	assert.NotNil(s.T(), err)
 }
 

@@ -23,13 +23,13 @@ func (_m *MockTodoRepository) CreateTodo(todo *models.Todo) error {
 	return ret.Error(0)
 }
 
-func (_m *MockTodoRepository) GetAllTodos(todos *[]models.Todo, userId int) error {
-	ret := _m.Called(todos, userId)
+func (_m *MockTodoRepository) GetAllTodos(todos *[]models.Todo, userID int) error {
+	ret := _m.Called(todos, userID)
 	return ret.Error(0)
 }
 
-func (_m *MockTodoRepository) GetTodoById(todo *models.Todo, id int, userId int) error {
-	ret := _m.Called(todo, id, userId)
+func (_m *MockTodoRepository) GetTodoByID(todo *models.Todo, id int, userID int) error {
+	ret := _m.Called(todo, id, userID)
 	return ret.Error(0)
 }
 

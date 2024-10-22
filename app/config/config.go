@@ -8,12 +8,12 @@ import (
 )
 
 type ConfigList struct {
-	DbDriverName   string
-	DbName         string
-	DbUserName     string
-	DbUserPassword string
-	DbHost         string
-	DbPort         string
+	DBDriverName   string
+	DBName         string
+	DBUserName     string
+	DBUserPassword string
+	DBHost         string
+	DBPort         string
 	ServerPort     int
 }
 
@@ -30,12 +30,12 @@ func init() {
 
 	serverPort, _ := strconv.Atoi(os.Getenv("SERVER_PORT"))
 	Config = ConfigList{
-		DbDriverName:   os.Getenv("DB_DRIVER_NAME"),
-		DbName:         os.Getenv("DB_NAME"),
-		DbUserName:     os.Getenv("DB_USER_NAME"),
-		DbUserPassword: os.Getenv("DB_USER_PASSWORD"),
-		DbHost:         os.Getenv("DB_HOST"),
-		DbPort:         os.Getenv("DB_PORT"),
+		DBDriverName:   os.Getenv("DB_DRIVER_NAME"),
+		DBName:         os.Getenv("DB_NAME"),
+		DBUserName:     os.Getenv("DB_USER_NAME"),
+		DBUserPassword: os.Getenv("DB_USER_PASSWORD"),
+		DBHost:         os.Getenv("DB_HOST"),
+		DBPort:         os.Getenv("DB_PORT"),
 		ServerPort:     serverPort,
 	}
 }

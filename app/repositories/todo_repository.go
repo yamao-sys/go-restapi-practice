@@ -8,8 +8,8 @@ import (
 
 type TodoRepository interface {
 	CreateTodo(todo *models.Todo) error
-	GetAllTodos(todos *[]models.Todo, userId int) error
-	GetTodoById(todo *models.Todo, id int, userId int) error
+	GetAllTodos(todos *[]models.Todo, userID int) error
+	GetTodoByID(todo *models.Todo, id int, userID int) error
 	UpdateTodo(todo *models.Todo) error
 	DeleteTodo(todo *models.Todo) error
 }
@@ -30,16 +30,16 @@ func (tr *todoRepository) CreateTodo(todo *models.Todo) error {
 	return nil
 }
 
-func (tr *todoRepository) GetAllTodos(todos *[]models.Todo, userId int) error {
-	if err := tr.db.Where("user_id = ?", userId).Find(&todos).Error; err != nil {
+func (tr *todoRepository) GetAllTodos(todos *[]models.Todo, userID int) error {
+	if err := tr.db.Where("user_id = ?", userID).Find(&todos).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (tr *todoRepository) GetTodoById(todo *models.Todo, id int, userId int) error {
-	if err := tr.db.Where("user_id = ?", userId).First(&todo, id).Error; err != nil {
+func (tr *todoRepository) GetTodoByID(todo *models.Todo, id int, userID int) error {
+	if err := tr.db.Where("user_id = ?", userID).First(&todo, id).Error; err != nil {
 		return err
 	}
 

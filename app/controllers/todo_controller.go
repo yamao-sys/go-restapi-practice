@@ -86,6 +86,10 @@ func (todoController *todoController) Show(ctx *gin.Context) {
 	}
 
 	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
 	result := todoController.todoService.FetchTodo(id, user.ID)
 
 	if result.Error == nil {
@@ -109,6 +113,10 @@ func (todoController *todoController) Update(ctx *gin.Context) {
 	}
 
 	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
 	// NOTE: リクエストデータを構造体に変換
 	requestParams := dto.UpdateTodoRequest{}
 	if err := ctx.ShouldBind(&requestParams); err != nil {
@@ -139,6 +147,10 @@ func (todoController *todoController) Delete(ctx *gin.Context) {
 		return
 	}
 	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
 	result := todoController.todoService.DeleteTodo(id, user.ID)
 
 	if result.Error == nil {
