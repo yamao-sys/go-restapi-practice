@@ -1,4 +1,4 @@
-name: Golang Test
+name: Golang Lint And Test
 
 on:
   pull_request:
