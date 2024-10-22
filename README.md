@@ -44,3 +44,8 @@ GoのREST APIで簡単なTODOリストを作ってみる
 	- https://qiita.com/yagi_eng/items/1c34f9691128c51846e7
 	- https://staticcheck.dev/docs/configuration
 	- https://staticcheck.dev/docs/checks/
+- reviewdog
+	- https://qiita.com/NanimonoDaemon/items/2be5ad35aa2eb100ef50
+	- https://github.com/reviewdog/reviewdog
+	- https://github.com/reviewdog/reviewdog?tab=readme-ov-file#option-1-run-reviewdog-from-github-actions-w-secretsgithub_token
+	- https://qiita.com/moroball14/items/3f35ebb28ecf773b6623
