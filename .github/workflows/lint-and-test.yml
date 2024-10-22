@@ -8,9 +8,6 @@ on:
 jobs:
   Lint:
     runs-on: ubuntu-latest
-
-    env:
-      REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
     steps:
       - name: Checkout
@@ -25,10 +22,19 @@ jobs:
         working-directory: ./app
         run: go mod tidy
 
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with: 
+          app_id: ${{ secrets.REVIEDOG_APP_ID }}
+          private_key: ${{ secrets.REVIEDOG_PRIVATE_KEY }}
+
       - name: Setup reviewdog
         uses: reviewdog/action-setup@v1
 
       - name: lint
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ steps.generate_token.outputs.token }}
         working-directory: ./app
         run: go install honnef.co/go/tools/cmd/staticcheck@latest && staticcheck ./... | reviewdog -reporter=github-pr-review -f=staticcheck -level=warn -filter-mode=nofilter -fail-on-error
   
